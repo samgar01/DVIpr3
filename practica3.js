@@ -91,31 +91,43 @@ Q.Sprite.extend("Mario",{
 			sheet: "marioR", // Setting a sprite sheet sets sprite width and height
 			sprite: "mario_anim",
 			x: 150, // You can also set additional properties that can
-			y: 450 // be overridden on object creation
+			y: 450, // be overridden on object creation
+			dead: false
 		});
 
-		this.add('2d, platformerControls, animation');
+		this.add('2d, platformerControls, animation, tween');
 
-		this.on("destroy",function(){this.play("dead");});
+		this.on("destroyMario", function() {
+			this.p.dead = true;
+			this.play("dead", 1);
+		});
 
-		this.on("deadfinish",function(){this.destroy();
-									 Q.stageScene("endGame",1, { label: "You Died" });});
+		this.on("deadfinish", function() {
+										//console.log("deadAnimation");
+										this.animate({ x: (this.p.x), vy: -300 }, 0.5, Q.Easing.Linear);
+										this.animate({ x: (this.p.x), y: (this.p.y + 60) }, 1, Q.Easing.Linear, {delay: 0.5, callback: this.reset});
+									});
+	},
+	reset: function() {
+		this.destroy();
+		Q.stageScene("endGame",1, { label: "You Died" });
 	},
 	step: function(dt) {
 	//	console.log("X: "+this.p.x+ "  Y:"+this.p.y);
-		if (this.p.y > 650) {
-			Q.stageScene("endGame",1, { label: "You Died" });
-			this.destroy();
-		}
-		if(this.p.vx > 0 && this.p.landed > 0) {
-			this.play("walk_right");
-		} else if(this.p.vx < 0 && this.p.landed > 0) {
-			this.play("walk_left");
-		} else if(this.p.landed < 0){
-			this.play("jump_" + this.p.direction);
-		}
-		  else {
-			this.play("stand_" + this.p.direction);
+		if (!this.p.dead) {
+			if (this.p.y > 650) {
+				this.trigger("destroyMario");
+			}
+			if(this.p.vx > 0 && this.p.landed > 0) {
+				this.play("walk_right");
+			} else if(this.p.vx < 0 && this.p.landed > 0) {
+				this.play("walk_left");
+			} else if(this.p.landed < 0){
+				this.play("jump_" + this.p.direction);
+			}
+			  else {
+				this.play("stand_" + this.p.direction);
+			}
 		}
 		//console.log(this.p.jumping);
 	}
@@ -130,7 +142,7 @@ Q.animations("mario_anim", {
 	jump_left: { frames: [4], rate: 1/10, flip: "x" },
 	stand_right: { frames:[0], rate: 1/10, flip: false },
 	stand_left: { frames: [0], rate: 1/10, flip: "x" },
-	dead: { frames: [13], rate: 1/10, flip: false, trigger: "deadfinish"}
+	dead: { frames: [12], rate: 1, loop: false, trigger: "deadfinish"}
 });
 
 Q.Sprite.extend("Goomba",{
@@ -146,7 +158,9 @@ Q.Sprite.extend("Goomba",{
 
 		this.on("bump.left,bump.right,bump.bottom",function(collision) {
 			if(collision.obj.isA("Mario")) {
-				collision.obj.trigger("destroy");
+				//collision.obj.p.vy = -300;
+				//collision.obj.p.vx = 0;
+				collision.obj.trigger("destroyMario");
 			}
 		});
 		// If the enemy gets hit on the top, destroy it
@@ -174,11 +188,9 @@ Q.Sprite.extend("Bloopa",{
 
 		this.on("bump.left,bump.right,bump.bottom",function(collision) {
 			if(collision.obj.isA("Mario")) {
-				collision.obj.play("dead");
-				collision.obj.on("destroy",function(){collision.obj.destroy();
-													console.log("hola");
-													  Q.stageScene("endGame",1, { label: "You Died" });});
-				
+				//collision.obj.p.vy = -300;
+				//collision.obj.p.vx = 0;
+				collision.obj.trigger("destroyMario");
 			}
 		});
 		// If the enemy gets hit on the top, destroy it

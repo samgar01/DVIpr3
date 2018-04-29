@@ -2,7 +2,7 @@ var game = function() {
 // Set up an instance of the Quintus engine and include
 // the Sprites, Scenes, Input and 2D module. The 2D module
 // includes the `TileLayer` class as well as the `2d` componet.
-var Q = window.Q = Quintus({ audioSupported: ['ogg','mp3'] })
+var Q = window.Q = Quintus({ audioSupported: ['mp3','ogg'] })
 	.include("Audio, Sprites, Scenes, Input, Touch, UI, Anim, TMX, 2D")
 	.setup({width: 320, // Set the default width to 320 pixels
 			height: 480, // Set the default height to 480 pixels
@@ -52,7 +52,7 @@ Q.scene('mainTitle',function(stage) {
 });
 
 Q.scene('endGame',function(stage) {
-	
+
   var box = stage.insert(new Q.UI.Container({
     x: Q.width/2, y: Q.height/2, fill: "rgba(0,0,0,0.5)"
   }));
@@ -69,7 +69,7 @@ Q.scene('endGame',function(stage) {
 });
 
 Q.scene('winGame',function(stage) {
-	
+
   var box = stage.insert(new Q.UI.Container({
     x: Q.width/2, y: Q.height/2, fill: "rgba(0,0,0,0.5)"
   }));
@@ -91,7 +91,7 @@ Q.loadTMX("level.tmx", function() {
 	Q.stageScene("mainTitle");
 });
 
-Q.load("mario_small.png, mario_small.json, goomba.png, goomba.json, bloopa.png, bloopa.json, princess.png, mainTitle.png, coin.png, coin.json, coin.mp3, music_die.mp3, music_level_complete.mp3, music_main.mp3", function() {
+Q.load("mario_small.png, mario_small.json, goomba.png, goomba.json, bloopa.png, bloopa.json, princess.png, mainTitle.png, coin.png, coin.json, coin.mp3, music_die.mp3, music_level_complete.mp3, music_main.mp3, jump.mp3, mario_touch_enemy.mp3", function() {
 	// From a .json asset that defines sprite locations
 	Q.sheet("princess","princess.png", { tilew: 30, tileh: 48});
 	Q.sheet("mainTitle","mainTitle.png");
@@ -309,10 +309,11 @@ Q.component("defaultEnemy",{
 		collisionMario: function(collision) {
 			if(collision.obj.isA("Mario")) {
 				collision.obj.trigger("destroyMario");
-			}	
+			}
 		},
 		deadEnemy: function(collision) {
 			if(collision.obj.isA("Mario")) {
+				Q.audio.play('mario_touch_enemy.mp3',{ loop: false });
 				this.trigger("dead");
 				collision.obj.p.vy = -300;
 			}

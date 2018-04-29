@@ -10,6 +10,7 @@ var Q = window.Q = Quintus({ audioSupported: ['mp3','ogg'] })
 	// And turn on default input controls and touch input (for UI)
 	.controls().touch().enableSound();
 
+/*---------------------------------LEVEL 1-----------------------------------*/
 Q.scene("level1",function(stage) {
 	Q.stageTMX("level.tmx",stage);
 
@@ -30,10 +31,13 @@ Q.scene("level1",function(stage) {
 	stage.viewport.offsetX = -90;
 });
 
+/*---------------------------------HUD-----------------------------------*/
 Q.scene("HUD",function(stage) {
 	var score = stage.insert(new Q.Score());
 });
 
+
+/*---------------------------------PANTALLA INICIO-----------------------------------*/
 Q.scene('mainTitle',function(stage) {
 	Q.audio.stop();
 	Q.audio.play('music_main.mp3',{ loop: true });
@@ -49,6 +53,8 @@ Q.scene('mainTitle',function(stage) {
 	});
 
   Q.input.on("start",this, function(){
+  	Q.audio.stop();
+	Q.audio.play('music_main.mp3',{ loop: true });
     Q.clearStages();
     Q.stageScene('HUD',1);
     Q.stageScene('level1');
@@ -62,6 +68,8 @@ Q.scene('mainTitle',function(stage) {
   box.fit(20);
 });
 
+
+/*---------------------------------FIN DEL JUEGO-----------------------------------*/
 Q.scene('endGame',function(stage) {
 
   var box = stage.insert(new Q.UI.Container({
@@ -79,6 +87,8 @@ Q.scene('endGame',function(stage) {
   box.fit(20);
 });
 
+
+/*---------------------------------YOU WIN-----------------------------------*/
 Q.scene('winGame',function(stage) {
 
   var box = stage.insert(new Q.UI.Container({
@@ -98,6 +108,8 @@ Q.scene('winGame',function(stage) {
   box.fit(20);
 });
 
+
+/*---------------------------------CARGA DEL NIVEL Y DE RECURSOS-----------------------------------*/
 Q.loadTMX("level.tmx", function() {
 	Q.stageScene("mainTitle");
 });
@@ -114,6 +126,9 @@ Q.load("mario_small.png, mario_small.json, goomba.png, goomba.json, bloopa.png, 
 	Q.stageScene("mainTitle");
 });
 
+
+
+/*---------------------------------MARIO-----------------------------------*/
 Q.Sprite.extend("Mario",{
 	init: function(p) {
 		this._super(p, {
@@ -172,7 +187,6 @@ Q.Sprite.extend("Mario",{
 				this.play("stand_" + this.p.direction);
 			}
 		}
-		//console.log("x: " + this.p.x + " y: " + this.p.y);
 	}
 });
 
@@ -188,6 +202,8 @@ Q.animations("mario_anim", {
 	dead: { frames: [12], rate: 1, loop: false, trigger: "deadfinish"}
 });
 
+
+/*---------------------------------MONEDA-----------------------------------*/
 Q.Sprite.extend("Coin",{
 	init: function(p) {
 		this._super(p, {
@@ -216,6 +232,8 @@ Q.animations("coin_anim", {
 	change: { frames: [0,1,2], rate: 1/4, flip: false, loop: true }
 });
 
+
+/*---------------------------------GOOMBA-----------------------------------*/
 Q.Sprite.extend("Goomba",{
 	init: function(p) {
 		this._super(p, {
@@ -241,6 +259,8 @@ Q.animations("goomba_anim", {
 	dead: { frames: [2], rate: 1, loop: false, trigger: "destroy"}
 });
 
+
+/*---------------------------------BLOOPA-----------------------------------*/
 Q.Sprite.extend("Bloopa",{
 	init: function(p) {
 		this._super(p, {
@@ -268,6 +288,8 @@ Q.animations("bloopa_anim", {
 	dead: { frames: [2], rate: 1, loop: false, trigger: "destroy"}
 });
 
+
+/*---------------------------------PRINCESS-----------------------------------*/
 Q.Sprite.extend("Princess",{
 	init: function(p) {
 		this._super(p, {
@@ -280,12 +302,15 @@ Q.Sprite.extend("Princess",{
 
 		this.on("bump.left,bump.right,bump.bottom,bump.top",function(collision) {
 			if(collision.obj.isA("Mario")) {
+				collision.obj.del("platformerControls");
 				Q.stageScene("winGame",1, { label: "You win!" });
 			}
 		});
 	}
 });
 
+
+/*---------------------------------PUNTUACIÓN Y LABEL DEL HUD-----------------------------------*/
 Q.UI.Text.extend("Score",{
 	init: function(p) {
 		this._super({
@@ -313,6 +338,8 @@ Q.UI.Text.extend("Score",{
 	}
 });
 
+
+/*---------------------------------COMPONENTE DEFAULTENEMY-----------------------------------*/
 Q.component("defaultEnemy",{
 	added: function() {
 		this.entity.on("bump.left,bump.right,bump.bottom","collisionMario");
@@ -348,21 +375,5 @@ Q.component("defaultEnemy",{
 	}
 
 });
-
-/*Q.animations("player_anim", {
-	walk_right: { frames: [0,1,2,3,4,5,6,7,8,9,10], rate: 1/15,
-	flip: false, loop: true },
-	walk_left: { frames: [0,1,2,3,4,5,6,7,8,9,10], rate: 1/15,
-	flip:"x", loop: true },
-	jump_right: { frames: [13], rate: 1/10, flip: false },
-	jump_left: { frames: [13], rate: 1/10, flip: "x" },
-	stand_right: { frames:[14], rate: 1/10, flip: false },
-	stand_left: { frames: [14], rate: 1/10, flip:"x" },
-	duck_right: { frames: [15], rate: 1/10, flip: false },
-	duck_left: { frames: [15], rate: 1/10, flip: "x" },
-	climb: { frames: [16, 17], rate: 1/3, flip: false }
-});*/
-//console.log("X: "+this.p.x+ "  Y:"+this.p.y);
-
 
 };

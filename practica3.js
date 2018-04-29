@@ -43,10 +43,21 @@ Q.scene('mainTitle',function(stage) {
 
   var button = box.insert(new Q.UI.Button({ x: 0, y: 0,
                                            asset: "mainTitle.png" }));
+
+  Q.input.keyboardControls({
+		ENTER: "start"
+	});
+
+  Q.input.on("start",this, function(){
+    Q.clearStages();
+    Q.stageScene('HUD',1);
+    Q.stageScene('level1');
+  }); 
+
   button.on("click",function() {
     Q.clearStages();
-    Q.stageScene('level1');
     Q.stageScene('HUD',1);
+    Q.stageScene('level1');
   });
   box.fit(20);
 });
@@ -91,7 +102,7 @@ Q.loadTMX("level.tmx", function() {
 	Q.stageScene("mainTitle");
 });
 
-Q.load("mario_small.png, mario_small.json, goomba.png, goomba.json, bloopa.png, bloopa.json, princess.png, mainTitle.png, coin.png, coin.json, coin.mp3, music_die.mp3, music_level_complete.mp3, music_main.mp3, jump.mp3, mario_touch_enemy.mp3", function() {
+Q.load("mario_small.png, mario_small.json, goomba.png, goomba.json, bloopa.png, bloopa.json, princess.png, mainTitle.png, coin.png, coin.json, coin.mp3, music_die.mp3, music_level_complete.mp3, music_main.mp3, jump.mp3, mario_touch_enemy.mp3, mamma_mia.mp3", function() {
 	// From a .json asset that defines sprite locations
 	Q.sheet("princess","princess.png", { tilew: 30, tileh: 48});
 	Q.sheet("mainTitle","mainTitle.png");
@@ -189,6 +200,7 @@ Q.Sprite.extend("Coin",{
 		this.on("pickCoin",function(collision) {
 			this.animate({ x: (this.p.x), y: (this.p.y - 50) }, 0.5, Q.Easing.Linear, {callback: this.delete});
 		});
+		Q.state.inc("totalCoins",1);
 	},
 
 	delete: function(){
@@ -277,19 +289,27 @@ Q.Sprite.extend("Princess",{
 Q.UI.Text.extend("Score",{
 	init: function(p) {
 		this._super({
-			label: "Score: 0",
 			x:60,
 			y: 0,
-			score: 0
+			score: 0,
+			totalCoins: 0,
+			label: "Coins: 0"
 		});
 		Q.state.set("score",0);
+		Q.state.set("totalCoins",0);
 
 		Q.state.on("change.score",this,"score");
+		Q.state.on("change.totalCoins",this,"totalCoins");
 	},
-
+	totalCoins: function(totalCoins) {
+		this.p.totalCoins = totalCoins;
+		this.p.label = "Coins: " + this.p.score + "/" + this.p.totalCoins;
+	},
 	score: function(score) {
 		this.p.score = score;
-		this.p.label = "Score: " + this.p.score;
+		this.p.label = "Coins: " + this.p.score + "/" + this.p.totalCoins;
+		if(this.p.score==this.p.totalCoins)
+			Q.audio.play('mamma_mia.mp3',{ loop: false });
 	}
 });
 

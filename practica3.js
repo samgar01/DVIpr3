@@ -52,7 +52,7 @@ Q.scene('mainTitle',function(stage) {
     Q.clearStages();
     Q.stageScene('HUD',1);
     Q.stageScene('level1');
-  }); 
+  });
 
   button.on("click",function() {
     Q.clearStages();
@@ -289,7 +289,7 @@ Q.Sprite.extend("Princess",{
 Q.UI.Text.extend("Score",{
 	init: function(p) {
 		this._super({
-			x:60,
+			x:70,
 			y: 0,
 			score: 0,
 			totalCoins: 0,
